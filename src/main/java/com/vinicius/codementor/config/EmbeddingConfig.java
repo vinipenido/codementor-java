@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.rag.content.retriever.EmbeddingStoreContentRetriever;
+import org.springframework.beans.factory.annotation.Value;
 
 
 @Configuration
@@ -21,13 +22,16 @@ public class EmbeddingConfig {
         return new AllMiniLmL6V2QuantizedEmbeddingModel();
     }
 
+    @Value("${DB_PASSWORD}")
+    private String dbPassword;
+
     @Bean
     public EmbeddingStore<TextSegment> embeddingStore() {
         return PgVectorEmbeddingStore.builder()
                 .host("localhost")
                 .port(5432)
                 .user("codementor")
-                .password("vini14192306@")
+                .password(dbPassword)
                 .database("codementor")
                 .table("document_embeddings")
                 .dimension(384)
