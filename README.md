@@ -74,6 +74,7 @@ docker compose up -d
 |---|---|
 | `ANTHROPIC_API_KEY` | Sua chave da API da Anthropic |
 | `JWT_SECRET` | Chave secreta para assinar os tokens JWT — gere com `openssl rand -base64 32` |
+| `DB_PASSWORD` | Senha do banco local (deve bater com a definida no `docker-compose.yml`) |
 
 ### 4. Rode a aplicação
 
@@ -86,6 +87,37 @@ docker compose up -d
 ```
 http://localhost:8080/swagger-ui/index.html
 ```
+
+### 6. Primeiro uso: registre um usuário e adicione uma base de conhecimento
+
+> ⚠️ **O banco de dados sobe vazio.** Nenhum PDF ou usuário vem pré-cadastrado no repositório — o material usado durante o desenvolvimento não é redistribuído aqui. Para testar o projeto, siga os passos abaixo com um PDF de sua escolha (de domínio público ou de sua própria autoria).
+
+**a) Registre um usuário:**
+```bash
+curl -X POST "http://localhost:8080/api/auth/registrar?email=seu@email.com&senha=suasenha"
+```
+
+**b) Faça login para obter o token JWT:**
+```bash
+curl -X POST "http://localhost:8080/api/auth/login?email=seu@email.com&senha=suasenha"
+```
+A resposta é o próprio token — copie-o para os próximos passos.
+
+**c) Ingira um PDF na base de conhecimento** (substitua pelo caminho do seu arquivo e pelo token obtido acima):
+```bash
+curl -G "http://localhost:8080/api/ingest" \
+  --data-urlencode "filePath=/caminho/completo/para/seu/livro.pdf" \
+  -H "Authorization: Bearer SEU_TOKEN_AQUI"
+```
+
+**d) Pergunte ao professor:**
+```bash
+curl -G "http://localhost:8080/api/professor" \
+  --data-urlencode "pergunta=o que é uma variável em java" \
+  -H "Authorization: Bearer SEU_TOKEN_AQUI"
+```
+
+Todos esses passos também podem ser executados pela interface do Swagger (passo 5), sem precisar do `curl`.
 
 ## 📡 Principais endpoints
 
@@ -105,8 +137,7 @@ http://localhost:8080/swagger-ui/index.html
 - [ ] Deploy em produção
 - [ ] Testes automatizados
 - [ ] Tratamento de erros mais refinado nos endpoints de autenticação
-- [ ] Externalizar credenciais do banco local via variável de ambiente
 
 ## 📄 Licença
 
-Este projeto está sob a licença MIT.
+Este projeto está sob a licença MIT. Os documentos usados para popular a base de conhecimento durante o desenvolvimento **não estão incluídos** neste repositório e não são cobertos por esta licença.
